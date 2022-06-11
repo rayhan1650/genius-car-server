@@ -36,6 +36,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     await client.connect();
+    const projectCollection = client.db("portfolio").collection("projects");
     const serviceCollection = client.db("geniusCar").collection("service");
     const orderCollection = client.db("geniusCar").collection("order");
 
@@ -45,6 +46,21 @@ async function run() {
         expiresIn: "1d",
       });
       res.send({ accessToken });
+    });
+
+    // my portfolio
+    app.get("/projects", async (req, res) => {
+      const query = {};
+      const cursor = projectCollection.find(query);
+      const projects = await cursor.toArray();
+      res.send(projects);
+    });
+
+    app.get("/projects/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const project = await projectCollection.findOne(query);
+      res.send(project);
     });
 
     app.get("/service", async (req, res) => {
